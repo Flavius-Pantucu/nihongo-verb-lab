@@ -47,16 +47,9 @@ export default function VerbLab(props) {
         }
       }
     }
+    if (kana == "あ") kana = "わ";
     setCurrentVerbHiragana(currentVerbHiragana.slice(0, -1) + kana);
   };
-
-  const hiraganaAlphabet = [
-    ["あ", "か", "が", "さ", "た", "な", "ば", "ま", "ら"],
-    ["い", "き", "ぎ", "し", "ち", "に", "び", "み", "り"],
-    ["う", "く", "ぐ", "す", "つ", "ぬ", "ぶ", "む", "る"],
-    ["え", "け", "げ", "せ", "て", "ね", "べ", "め", "れ"],
-    ["お", "こ", "ご", "そ", "と", "の", "ぼ", "も", "ろ"],
-  ];
 
   const methodHelper = (helper) => {
     let css;
@@ -73,6 +66,32 @@ export default function VerbLab(props) {
     return css;
   };
 
+  const changeVerbHelper = (helper) => {
+    if (!methodHelper(helper)) return;
+    setCurrentVerbHelper(helper);
+    console.log(currentVerbHelper);
+  };
+
+  const printKana = (idx) => {
+    if (currentVerbHiragana && idx < currentVerbHiragana.length)
+      return currentVerbHiragana[idx];
+    if (
+      currentVerbHelper &&
+      idx >= currentVerbHiragana.length &&
+      idx < currentVerbHiragana.length + currentVerbHelper[0].length
+    ) {
+      return currentVerbHelper[0][idx - currentVerbHiragana.length];
+    }
+  };
+
+  const hiraganaAlphabet = [
+    ["あ", "か", "が", "さ", "た", "な", "ば", "ま", "ら"],
+    ["い", "き", "ぎ", "し", "ち", "に", "び", "み", "り"],
+    ["う", "く", "ぐ", "す", "つ", "ぬ", "ぶ", "む", "る"],
+    ["え", "け", "げ", "せ", "て", "ね", "べ", "め", "れ"],
+    ["お", "こ", "ご", "そ", "と", "の", "ぼ", "も", "ろ"],
+  ];
+
   const verbHelpers = [
     ["ます", "do~, will~ (formal)", 1, "ichidan"],
     ["ました", "did~ (formal)", 1, "ichidan"],
@@ -82,10 +101,10 @@ export default function VerbLab(props) {
     ["た", "~did (informal)", -2, "ichidan"],
     ["ない", "~don't, won't~ (informal)", 0, "ichidan"],
     ["なかった", "~didn't (informal)", 0, "ichidan"],
-    ["(ら)れる", "able to~, can~", null, "ichidan"],
-    ["(ら)れた", "was able to~, could~", null, "ichidan"],
-    ["(ら)れない", "won't be able to~, can't~", null, "ichidan"],
-    ["(ら)れなかった", "wasn't able to~, couldn't~", null, "ichidan"],
+    ["られる", "able to~, can~", null, "ichidan"],
+    ["られた", "was able to~, could~", null, "ichidan"],
+    ["られない", "won't be able to~, can't~", null, "ichidan"],
+    ["られなかった", "wasn't able to~, couldn't~", null, "ichidan"],
     ["たい", "want to~", 1, "ichidan"],
     ["たかった", "wanted to~", 1, "ichidan"],
     ["たくない", "don't want to~", 1, "ichidan"],
@@ -164,7 +183,7 @@ export default function VerbLab(props) {
                   onClick={() => removeStem(idx)}
                   key={idx}
                   className='h-full aspect-square bg-[#F07167]/90 rounded-2xl flex justify-center items-center border-dashed border-2 border-slate-100/70 cursor-default text-7xl hover:bg-[#FFBE86]/90 transition-colors duration-150 ease-linear'>
-                  {currentVerbHiragana && currentVerbHiragana[idx]}
+                  {printKana(idx)}
                 </div>
               ))}
             </div>
@@ -226,8 +245,7 @@ export default function VerbLab(props) {
                   {verbStems.map((verbStem, index) => (
                     <div
                       key={index}
-                      className={`w-full h-[16%] bg-[#BBD5ED]/90 rounded-3xl flex flex-col
-                       ${verbStem == "" ? "opacity-0" : "opacity-100"}`}>
+                      className={`w-full h-[16%] bg-[#BBD5ED]/90 rounded-3xl flex flex-col`}>
                       <div className='w-full h-[65%] text-5xl flex justify-center items-end select-none'>
                         {verbStem}
                       </div>
@@ -255,12 +273,16 @@ export default function VerbLab(props) {
                               : "bg-[#9EB7E5]/60 cursor-not-allowed"
                           }
                           ${
-                            currentVerb &&
-                            stemRemovedFlag == false &&
-                            kana ==
+                            (currentVerb &&
+                              stemRemovedFlag == false &&
+                              kana ==
+                                currentVerbHiragana[
+                                  currentVerbHiragana.length - 1
+                                ]) ||
+                            (kana == "あ" &&
                               currentVerbHiragana[
                                 currentVerbHiragana.length - 1
-                              ]
+                              ] == "わ")
                               ? "bg-[#F07167]/90"
                               : ""
                           }
@@ -316,7 +338,7 @@ export default function VerbLab(props) {
                   {verbHelpers.map((helper, idx) => (
                     <div
                       key={idx}
-                      onMouseOver={() => setCurrentVerbHelper(helper)}
+                      onMouseOver={() => changeVerbHelper(helper)}
                       onMouseOut={() => setCurrentVerbHelper("")}
                       className={`w-[24%] bg-[#9EB7E5]/60 text-xl font-semibold flex justify-center items-center cursor-not-allowed rounded-xl
                       ${methodHelper(helper)}`}>
