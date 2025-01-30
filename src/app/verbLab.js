@@ -1,6 +1,5 @@
 "use client";
 
-import { M_PLUS_1 } from "next/font/google";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
@@ -39,7 +38,7 @@ export default function VerbLab(props) {
   };
 
   const changeStem = (kana) => {
-    if (currentVerb[4] == "ichidan" || kana == "") return;
+    if (currentVerb == "" || currentVerb[4] == "ichidan" || kana == "") return;
 
     for (let i = 0; i < hiraganaAlphabet.length; i++) {
       for (let j = 0; j < hiraganaAlphabet[i].length; j++) {
@@ -57,37 +56,51 @@ export default function VerbLab(props) {
     ["う", "く", "ぐ", "す", "つ", "ぬ", "ぶ", "む", "る"],
     ["え", "け", "げ", "せ", "て", "ね", "べ", "め", "れ"],
     ["お", "こ", "ご", "そ", "と", "の", "ぼ", "も", "ろ"],
-    ["わ", "", "", "", "", "", "", "", ""],
   ];
+
+  const methodHelper = (helper) => {
+    let css;
+    if (currentVerb[4] == "ichidan") {
+      if (stemRemovedFlag && helper[3] == "ichidan")
+        css = "bg-green-400 cursor-pointer";
+      else if (!stemRemovedFlag && helper[2] < 0)
+        css = "bg-orange-400 cursor-pointer";
+    } else if (currentVerb[4] == "godan") {
+      if (currentVerbRow == helper[2]) css = "bg-green-400 cursor-pointer";
+      else if (currentVerbRow == 2 && helper[2] < 0)
+        css = "bg-orange-400 cursor-pointer";
+    }
+    return css;
+  };
 
   const verbHelpers = [
-    ["ます", "do~, will~ (formal)", 1],
-    ["ました", "did~ (formal)", 1],
-    ["ません", "don't~, won't~ (formal)", 1],
-    ["ませんでした", "didn't~ (formal)", 1],
-    ["る", "do~, will~ (informal)", 3],
-    ["た", "~did (informal)", -2],
-    ["ない", "~don't, won't~ (informal)", 0],
-    ["なかった", "~didn't (informal)", 0],
-    ["(ら)れる", "able to~, can~", null],
-    ["(ら)れた", "was able to~, could~", null],
-    ["(ら)れない", "won't be able to~, can't~", null],
-    ["(ら)れなかった", "wasn't able to~, couldn't~", null],
-    ["たい", "want to~", 1],
-    ["たかった", "wanted to~", 1],
-    ["たくない", "don't want to~", 1],
-    ["たくなかった", "didn't want to~", 1],
-    ["ましょう", "let's~ (formal)", null],
-    ["よう", "let's~ (informal)", null],
-    ["う", "let's~ (formal)", 4],
-    ["こと", "to~, ~ing (noun)", -1],
-    ["て", "do~ (command)", -2],
-    ["ないで", "don't~ (command)", 0],
-    ["ないほうがいい", "shouldn't do~", 0],
-    ["なくてもいい", "don't have to~", 0],
+    ["ます", "do~, will~ (formal)", 1, "ichidan"],
+    ["ました", "did~ (formal)", 1, "ichidan"],
+    ["ません", "don't~, won't~ (formal)", 1, "ichidan"],
+    ["ませんでした", "didn't~ (formal)", 1, "ichidan"],
+    ["る", "do~, will~ (informal)", 3, "ichidan"],
+    ["た", "~did (informal)", -2, "ichidan"],
+    ["ない", "~don't, won't~ (informal)", 0, "ichidan"],
+    ["なかった", "~didn't (informal)", 0, "ichidan"],
+    ["(ら)れる", "able to~, can~", null, "ichidan"],
+    ["(ら)れた", "was able to~, could~", null, "ichidan"],
+    ["(ら)れない", "won't be able to~, can't~", null, "ichidan"],
+    ["(ら)れなかった", "wasn't able to~, couldn't~", null, "ichidan"],
+    ["たい", "want to~", 1, "ichidan"],
+    ["たかった", "wanted to~", 1, "ichidan"],
+    ["たくない", "don't want to~", 1, "ichidan"],
+    ["たくなかった", "didn't want to~", 1, "ichidan"],
+    ["ましょう", "let's~ (formal)", null, "ichidan"],
+    ["よう", "let's~ (informal)", null, "ichidan"],
+    ["う", "let's~ (formal)", 4, "godan"],
+    ["こと", "to~, ~ing (noun)", -1, null],
+    ["て", "do~ (command)", -2, "ichidan"],
+    ["ないで", "don't~ (command)", 0, "ichidan"],
+    ["ないほうがいい", "shouldn't do~", 0, "ichidan"],
+    ["なくてもいい", "don't have to~", 0, "ichidan"],
   ];
 
-  const verbStems = ["あ", "い", "う", "え", "お", ""];
+  const verbStems = ["あ", "い", "う", "え", "お"];
 
   const verbs = convertVerbStringToObject(props.verbs);
 
@@ -306,19 +319,7 @@ export default function VerbLab(props) {
                       onMouseOver={() => setCurrentVerbHelper(helper)}
                       onMouseOut={() => setCurrentVerbHelper("")}
                       className={`w-[24%] bg-[#9EB7E5]/60 text-xl font-semibold flex justify-center items-center cursor-not-allowed rounded-xl
-                      ${helper[2] == currentVerbRow}
-                      ${
-                        currentVerb[4] == "ichidan" &&
-                        stemRemovedFlag &&
-                        helper[2] != -1
-                          ? "bg-green-400 cursor-pointer"
-                          : ""
-                      }
-                      ${
-                        helper[2] < 0 && !stemRemovedFlag && currentVerbRow == 2
-                          ? "bg-orange-400 cursor-pointer"
-                          : ""
-                      }`}>
+                      ${methodHelper(helper)}`}>
                       {helper[0]}
                     </div>
                   ))}
