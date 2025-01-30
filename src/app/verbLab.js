@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function VerbLab(props) {
   const convertVerbStringToObject = (json) => {
@@ -67,9 +67,97 @@ export default function VerbLab(props) {
   };
 
   const changeVerbHelper = (helper) => {
-    if (!methodHelper(helper)) return;
-    setCurrentVerbHelper(helper);
-    console.log(currentVerbHelper);
+    if (helper != "" && !methodHelper(helper)) return;
+
+    if (helper == "") {
+      console.log(currentVerbHiragana, removedKana.current);
+      setCurrentVerbHelper("");
+      setCurrentVerbHiragana(currentVerbHiragana + removedKana.current);
+      removedKana.current = "";
+      return;
+    }
+
+    if (helper[0] == "て") {
+      if (currentVerb[4] == "ichidan" && stemRemovedFlag)
+        setCurrentVerbHelper(helper);
+      else if (currentVerb[4] == "ichidan" && !stemRemovedFlag) {
+        removedKana.current = currentVerbHiragana.slice(-1);
+        setCurrentVerbHiragana(currentVerbHiragana.slice(0, -1));
+        setCurrentVerbHelper(helper);
+      } else if (
+        currentVerb[4] == "godan" &&
+        (currentVerbColumn == 0 ||
+          currentVerbColumn == 4 ||
+          currentVerbColumn == 8 ||
+          currentVerb[1] == "いく")
+      ) {
+        removedKana.current = currentVerbHiragana.slice(-1);
+        setCurrentVerbHiragana(currentVerbHiragana.slice(0, -1));
+        setCurrentVerbHelper(["って", "do~ (command)", "", ""]);
+      } else if (
+        currentVerb[4] == "godan" &&
+        (currentVerbColumn == 5 ||
+          currentVerbColumn == 6 ||
+          currentVerbColumn == 7)
+      ) {
+        removedKana.current = currentVerbHiragana.slice(-1);
+        setCurrentVerbHiragana(currentVerbHiragana.slice(0, -1));
+        setCurrentVerbHelper(["んで", "do~ (command)", "", ""]);
+      } else if (currentVerb[4] == "godan" && currentVerbColumn == 3) {
+        removedKana.current = currentVerbHiragana.slice(-1);
+        setCurrentVerbHiragana(currentVerbHiragana.slice(0, -1));
+        setCurrentVerbHelper(["して", "do~ (command)", "", ""]);
+      } else if (currentVerb[1] == "godan" && currentVerbColumn == 3) {
+        removedKana.current = currentVerbHiragana.slice(-1);
+        setCurrentVerbHiragana(currentVerbHiragana.slice(0, -1));
+        setCurrentVerbHelper(["いて", "do~ (command)", "", ""]);
+      } else if (currentVerb[2] == "godan" && currentVerbColumn == 3) {
+        removedKana.current = currentVerbHiragana.slice(-1);
+        setCurrentVerbHiragana(currentVerbHiragana.slice(0, -1));
+        setCurrentVerbHelper(["いで", "do~ (command)", "", ""]);
+      }
+    } else if (helper[0] == "た") {
+      if (currentVerb[4] == "ichidan" && stemRemovedFlag)
+        setCurrentVerbHelper(helper);
+      else if (currentVerb[4] == "ichidan" && !stemRemovedFlag) {
+        removedKana.current = currentVerbHiragana.slice(-1);
+        setCurrentVerbHiragana(currentVerbHiragana.slice(0, -1));
+        setCurrentVerbHelper(helper);
+      } else if (
+        currentVerb[4] == "godan" &&
+        (currentVerbColumn == 0 ||
+          currentVerbColumn == 4 ||
+          currentVerbColumn == 8 ||
+          currentVerb[1] == "いく")
+      ) {
+        removedKana.current = currentVerbHiragana.slice(-1);
+        setCurrentVerbHiragana(currentVerbHiragana.slice(0, -1));
+        setCurrentVerbHelper(["った", "do~ (command)", "", ""]);
+      } else if (
+        currentVerb[4] == "godan" &&
+        (currentVerbColumn == 5 ||
+          currentVerbColumn == 6 ||
+          currentVerbColumn == 7)
+      ) {
+        removedKana.current = currentVerbHiragana.slice(-1);
+        setCurrentVerbHiragana(currentVerbHiragana.slice(0, -1));
+        setCurrentVerbHelper(["んだ", "do~ (command)", "", ""]);
+      } else if (currentVerb[4] == "godan" && currentVerbColumn == 3) {
+        removedKana.current = currentVerbHiragana.slice(-1);
+        setCurrentVerbHiragana(currentVerbHiragana.slice(0, -1));
+        setCurrentVerbHelper(["した", "do~ (command)", "", ""]);
+      } else if (currentVerb[1] == "godan" && currentVerbColumn == 3) {
+        removedKana.current = currentVerbHiragana.slice(-1);
+        setCurrentVerbHiragana(currentVerbHiragana.slice(0, -1));
+        setCurrentVerbHelper(["いた", "do~ (command)", "", ""]);
+      } else if (currentVerb[2] == "godan" && currentVerbColumn == 3) {
+        removedKana.current = currentVerbHiragana.slice(-1);
+        setCurrentVerbHiragana(currentVerbHiragana.slice(0, -1));
+        setCurrentVerbHelper(["いだ", "do~ (command)", "", ""]);
+      }
+    } else {
+      setCurrentVerbHelper(helper);
+    }
   };
 
   const printKana = (idx) => {
@@ -131,6 +219,8 @@ export default function VerbLab(props) {
   const [stemRemovedFlag, setStemRemovedFlag] = useState(false);
 
   const [currentVerbHelper, setCurrentVerbHelper] = useState("");
+
+  const removedKana = useRef("");
 
   const [searchVerbInput, setSearchVerbInput] = useState("");
 
@@ -339,7 +429,7 @@ export default function VerbLab(props) {
                     <div
                       key={idx}
                       onMouseOver={() => changeVerbHelper(helper)}
-                      onMouseOut={() => setCurrentVerbHelper("")}
+                      onMouseOut={() => changeVerbHelper("")}
                       className={`w-[24%] bg-[#9EB7E5]/60 text-xl font-semibold flex justify-center items-center cursor-not-allowed rounded-xl
                       ${methodHelper(helper)}`}>
                       {helper[0]}
